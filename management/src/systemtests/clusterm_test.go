@@ -62,3 +62,18 @@ func (s *SystemTestSuite) TestClustermFailureActiveJob(c *C) {
 	// try a decommission job once previous job is done
 	s.decommissionNode(c, nodeName1, s.tbn2)
 }
+
+func (s *SystemTestSuite) TestSerfFailureOnClustermHost(c *C) {
+	nodeName := validNodeNames[0]
+	// make sure test node is visible in inventory
+	s.getNodeInfoSuccess(c, nodeName)
+
+	// stop serf discovery on test node
+	s.stopSerf(c, s.tbn1)
+
+	// wait for serf membership to update
+	s.waitForSerfMembership(c, s.tbn2, nodeName, "failed")
+
+	// make sure clusterm is up and running
+	s.checkClustermState(c, s.tbn1, "active")
+}
